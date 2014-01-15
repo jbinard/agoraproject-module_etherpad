@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml-stylesheet type="text/xsl" href="modx.format.xsl"?>
+
+<mod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="modx-1.2.5.xsd">
+	<header>
+		<!-- Adresse où peut être consultée la licence sous laquelle le module est distribué -->
+		<license>http://www.gnu.org/licenses/gpl.html</license>
+		<!-- Nom du module -->
+		<title lang="fr">Etherpad</title>
+		<!-- Description brève du module -->
+		<description lang="fr">Ce module permet d'intégrer l'édition collaborative de documents dans Agora Project par l'intermédiaire d'Etherpad lite.</description>
+		<!-- Notes additionnelles de l'auteur -->
+		<author-notes lang="fr">Ce module nécessite un serveur Etherpad lite fonctionnel ainsi que sa clé API. 
+		Pour savoir comment installer Etherpad-lite, rendez-vous sur https://github.com/ether/etherpad-lite/blob/master/README.md
+		
+		La clé API se trouve à la racine du répertoire d'installation d'Etherpad lite, dans le fichier APIKEY.txt</author-notes>
+
+		<author-group>
+			<author>
+				<!-- Nom de l'auteur -->
+				<realname>Grumpf</realname>
+				<!-- Pseudo de l'auteur sur Cyrakuse.fr -->
+				<username cyrakuse="yes">Grumpf</username>
+				<!-- Adresse du site internet de l'auteur -->
+				<homepage>http://labullelibre.eu</homepage>
+				<!-- Adresse mail de l'auteur -->
+				<email>jbinard@labullelibre.eu</email>
+				<!-- Description de la contribution -->
+				<contributions-group>
+					<contributions from='14/01/2013' status='current' position='Développeur'></contributions>
+				</contributions-group>
+			</author>
+		</author-group>
+		
+		<!-- Version du module -->
+		<mod-version>1.0</mod-version>
+
+		<installation>
+			<!-- Niveau de difficulté de l'installation (facile, moyen, difficile) -->
+			<level>moyen</level>
+			<!-- Temps nécessaire pour installer le module (en secondes) -->
+			<time>300</time>
+			<!-- Version d'Agora nécessaire pour installer le module -->
+			<target-version>2.16.4</target-version>
+		</installation>
+
+		<!-- Historique des versions -->
+		<history>
+			<entry>
+				<date>14/01/2013</date>
+				<rev-version>1.0</rev-version>
+				<changelog lang="fr">
+					<change>Version initiale du module</change>
+				</changelog>
+			</entry>
+		</history>
+
+	</header>
+<!-- A partir du moment où du code (sql ou php) est mis, il faut l'encadrer des balises <![CDATA[ et ]]> car sinon cela créer un bug d'affichage. 
+	Cela permet à la page de ne pas interpréter ce code -->
+	
+	<action-group>
+		<!-- Requête SQL -->
+		<sql dbms="mysql"><![CDATA[CREATE TABLE IF NOT EXISTS `gt_etherpad` (
+  `id_etherpad` int(8) unsigned NOT NULL AUTO_INCREMENT,
+  `id_dossier` int(8) unsigned DEFAULT NULL,
+  `nom` mediumtext,
+  `id_serveur` mediumtext,
+  `raccourci` tinyint(4) DEFAULT NULL,
+  `date_crea` datetime DEFAULT NULL,
+  `id_utilisateur` int(8) unsigned DEFAULT NULL,
+  `invite` text,
+  `date_modif` datetime DEFAULT NULL,
+  `id_utilisateur_modif` int(8) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id_etherpad`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+
+
+CREATE TABLE IF NOT EXISTS `gt_etherpad_dossier` (
+  `id_dossier` int(8) unsigned NOT NULL AUTO_INCREMENT,
+  `id_dossier_parent` int(8) unsigned DEFAULT '0',
+  `nom` text,
+  `description` mediumtext,
+  `raccourci` tinyint(4) DEFAULT NULL,
+  `date_crea` datetime DEFAULT NULL,
+  `id_utilisateur` int(8) unsigned DEFAULT NULL,
+  `invite` text,
+  `date_modif` datetime DEFAULT NULL,
+  `id_utilisateur_modif` int(8) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id_dossier`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+ALTER TABLE gt_etherpad DROP PRIMARY KEY, ADD PRIMARY KEY(`id_etherpad`,`id_dossier`);
+
+ALTER TABLE gt_etherpad_dossier DROP PRIMARY KEY, ADD PRIMARY KEY(`id_dossier`,`id_dossier_parent`);
+
+INSERT INTO gt_module (nom, module_path) VALUES ('etherpad', 'module_etherpad');]]></sql>
+		
+		
+		
+		<!-- Fichier à copier -->
+		<copy>
+			<file from="root/module_etherpad/" to="/module_etherpad" />
+			<file from="root/templates/module_etherpad/" to="/templates/module_etherpad/" />
+			<file from="root/traduction/module_fr/module_etherpad.php" to="/traduction/module_fr/module_etherpad.php" />
+		</copy>
+		
+		<!-- Modification des fichiers -->
+		
+		<open src="/module_etherpad/commun.inc.php">
+			<edit>
+				<comment lang="fr">Ajout de l'adresse du serveur Etherpad-lite et de la clé API en début de fichier.</comment>
+				<!-- trouver le texte suivant -->
+				<find><![CDATA[$etherpad_url = '';
+$etherpad_api_key = '';>]]></find>
+				<action type="replace-with"><![CDATA[$etherpad_url = 'http://adresse-serveur-etherpad.com:9001';
+$etherpad_api_key = 'cle_api_du_serveur_etherpad';]]></action>
+			</edit>
+		</open>
+		
+		<open src="/traduction/francais.php">
+			<edit>
+				<!-- commentaire pour la modification (cette ligne est facultative -->
+				<comment lang="fr">Cette modification est identique à plusieurs modules. Donc ne la faites pas si vous l'avez déjà faite pour un autre module.</comment>
+				<!-- trouver le texte suivant -->
+				<find><![CDATA[?>]]></find>
+				<!-- Action : remplacer par -->
+				<action type="before-add"><![CDATA[////	MODULES ADDITIONNELS
+////
+$liste_module	 = db_tableau("SELECT * FROM gt_module WHERE gt_module.nom not in ('tableau_bord','utilisateurs','agenda','fichier','forum','tache','lien','contact','mail','install')" );
+foreach($liste_module as $module)
+{
+	include "modules_fr/".$module["module_path"].".php";
+}]]></action>
+			</edit>
+		</open>
+		
+		<diy-instructions lang="fr">Activer le module dans le paramétrage des espaces où le module doit être actif.</diy-instructions>
+	</action-group>
+</mod>
