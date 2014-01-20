@@ -1,7 +1,7 @@
 <?php
 ////	INITIALISATION
 ////
-$version_module = "1.0";
+$version_module = "1.1";
 $version_agora = "2.16.4";
 $nom_module ="etherpad";
 define("IS_MAIN_PAGE",true);

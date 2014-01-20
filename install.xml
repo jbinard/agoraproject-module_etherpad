@@ -33,7 +33,7 @@
 		</author-group>
 		
 		<!-- Version du module -->
-		<mod-version>1.0</mod-version>
+		<mod-version>1.1</mod-version>
 
 		<installation>
 			<!-- Niveau de difficulté de l'installation (facile, moyen, difficile) -->
@@ -46,6 +46,13 @@
 
 		<!-- Historique des versions -->
 		<history>
+			<entry>
+				<date>20/01/2013</date>
+				<rev-version>1.1</rev-version>
+				<changelog lang="fr">
+					<change>Adaptation automatique du pad à la hauteur de la page</change>
+				</changelog>
+			</entry>
 			<entry>
 				<date>14/01/2013</date>
 				<rev-version>1.0</rev-version>
